@@ -20,12 +20,13 @@ pi 自定义 sub agent 套件：**workhorse**（牛马狗，干活主力）+ **o
 
 ## 命令
 
-`/fun-agent-cfg` — 配置 agent 的模型与思考强度：
+`/fun-agent-cfg` — 三面板网格交互式配置（←/→ 或 Tab 切栏，↑↓ 栏内移动，Enter 保存，Esc 取消）：
 
-- `/fun-agent-cfg get <agent>` — 查看当前 model/thinking
-- `/fun-agent-cfg set <agent> model <provider/modelId>` — 设置模型
-- `/fun-agent-cfg set <agent> thinking <level>` — 设置思考强度（off/minimal/low/medium/high/xhigh/max）
-- `/fun-agent-cfg reset <agent>` — 删除 model/thinking，回退继承
+- **Agent** 面板：选择要配置的 agent（显示 `display_name` 中文名）
+- **Model** 面板：选择模型（当前会话可用模型 + inherit），支持键入过滤，✓ 标记已保存值
+- **Think Level** 面板：选择思考强度（inherit / off / 模型支持的档位）
+
+`inherit` = 删除 frontmatter 对应行，回退继承会话默认。可带参数预选 agent：`/fun-agent-cfg workhorse`。
 
 改完 frontmatter 后**下一次 spawn 生效**，无需 /reload。
 
