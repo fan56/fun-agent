@@ -20,13 +20,18 @@ pi 自定义 sub agent 套件：**workhorse**（牛马狗，干活主力）+ **o
 
 ## 命令
 
-`/fun-agent-cfg` — 三面板网格交互式配置（←/→ 或 Tab 切栏，↑↓ 栏内移动，Enter 保存，Esc 取消）：
+`/fun-agent-cfg` — 级联式交互配置（仿 rpiv-models 的二段选择，↑↓ 导航，Enter 选择，Esc 返回上一层）：
 
-- **Agent** 面板：选择要配置的 agent（显示 `display_name` 中文名）
-- **Model** 面板：选择模型（当前会话可用模型 + inherit），支持键入过滤，✓ 标记已保存值
-- **Think Level** 面板：选择思考强度（inherit / off / 模型支持的档位）
+    顶层菜单（选择 agent，Esc 退出）
+      └─ <agent> → 选模型 → 选思考强度 → 保存 → 回顶层菜单
 
-`inherit` = 删除 frontmatter 对应行，回退继承会话默认。可带参数预选 agent：`/fun-agent-cfg workhorse`。
+- **顶层菜单**：选择要配置的 agent（显示 `display_name` 中文名），保存后回到这里可继续配置下一个
+- **Model**：选择模型（按收藏筛选 + inherit），支持键入过滤，✓ 标记已保存值
+- **Think Level**：选择思考强度（inherit / off / 模型支持的档位），Esc 回到模型选择
+
+模型列表按收藏自动筛选：读 `~/.pi/agent/model-favorites.json`（与 `/m` 命令共享）的 `favorites`，非空时仅显示收藏模型，为空时显示全部。用 `/m` 管理收藏列表（本命令不提供编辑界面）。
+
+`inherit` = 删除 frontmatter 对应行，回退继承会话默认。可带参数预选 agent：`/fun-agent-cfg workhorse`（跳过顶层菜单，直接进级联）。
 
 改完 frontmatter 后**下一次 spawn 生效**，无需 /reload。
 
