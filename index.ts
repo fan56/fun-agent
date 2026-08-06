@@ -13,7 +13,10 @@
  * - 改完下一次 Agent spawn 自动生效（pi-subagents 每次调用重读磁盘），无需 /reload。
  */
 
-import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import type {
+	ExtensionAPI,
+	ExtensionContext,
+} from "@earendil-works/pi-coding-agent";
 import type { Api, Model } from "@earendil-works/pi-ai";
 import { getSupportedThinkingLevels } from "@earendil-works/pi-ai";
 import {
@@ -41,6 +44,8 @@ interface AgentEntry {
 interface PickerItem {
 	value: string;
 	label: string;
+	/** 二级说明行：存在时条目渲染为「名字 || 介绍」单行（分隔符填充空隙） */
+	sub?: string;
 	check?: boolean;
 }
 
@@ -110,7 +115,12 @@ function readFrontmatter(path: string): {
 	const { lines } = readLines(content);
 	const bounds = parseFrontmatterBounds(lines);
 	if (!bounds) return {};
-	const fm: { model?: string; thinking?: string; displayName?: string; description?: string } = {};
+	const fm: {
+		model?: string;
+		thinking?: string;
+		displayName?: string;
+		description?: string;
+	} = {};
 	for (const line of lines.slice(bounds.start + 1, bounds.end)) {
 		const m = line.match(/^(model|thinking|display_name|description):\s*(.+)$/);
 		if (m) {
@@ -228,7 +238,8 @@ function pickFromList(
 			return opts.items.filter(
 				(i) =>
 					i.label.toLowerCase().includes(q) ||
-					i.value.toLowerCase().includes(q),
+					i.value.toLowerCase().includes(q) ||
+					(i.sub ?? "").toLowerCase().includes(q),
 			);
 		};
 
@@ -244,7 +255,7 @@ function pickFromList(
 				cursor = f.length ? Math.min(cursor, f.length - 1) : 0;
 				const rows = Math.min(MAX_ROWS, Math.max(f.length, 1));
 				scroll = clampScroll(scroll, cursor, f.length, rows);
-				const panelW = Math.min(Math.max(width, 30), 72);
+				const panelW = Math.min(Math.max(width, 30), 100);
 				const innerW = Math.max(1, panelW - 2);
 
 				const out: string[] = [];
@@ -260,6 +271,19 @@ function pickFromList(
 					// 先截断纯文本，再套样式（与原文件一致，避免 ANSI 进 truncate）
 					const trunc = truncateToWidth(it.label, Math.max(1, innerW - 4));
 					const body = isCur ? theme.bold(trunc) : trunc;
+					// 单行布局：名字 分隔符 介绍（分隔符 ||；空间不足只显示名字）
+					if (it.sub) {
+						const nameW = visibleWidth(trunc);
+						const descMax = innerW - 4 - nameW - 4; // 4 = 分隔符「 || 」占宽
+						if (descMax >= 8) {
+							const subFull = truncateToWidth(it.sub, descMax);
+							return (
+								`${pointer} ${mark} ${body}` +
+								theme.fg("muted", " || ") +
+								theme.fg("muted", subFull)
+							);
+						}
+					}
 					return `${pointer} ${mark} ${body}`;
 				};
 				for (let r = 0; r < rows; r++) {
@@ -267,8 +291,8 @@ function pickFromList(
 					const row = i < f.length ? renderRow(f[i], i === cursor) : "";
 					out.push(
 						theme.fg("accent", "│") +
-							padToWidth(row, innerW) +
-							theme.fg("accent", "│"),
+						padToWidth(row, innerW) +
+						theme.fg("accent", "│"),
 					);
 				}
 				out.push(theme.fg("accent", "└" + "─".repeat(panelW - 2) + "┘"));
@@ -304,7 +328,8 @@ function pickFromList(
 					done(null);
 					return;
 				} else if (typeof data === "string") {
-					if (data === "\u0008" || data === "\u007f") query = query.slice(0, -1);
+					if (data === "\u0008" || data === "\u007f")
+						query = query.slice(0, -1);
 					else if (isPrintable(data)) query += data;
 				}
 				tui.requestRender();
@@ -314,13 +339,24 @@ function pickFromList(
 }
 
 /** 思考档位：inherit + off（若支持）+ 模型支持的档位（去重，含 max）。 */
-function buildThinkItems(model: Model<Api>, currentThink?: string): PickerItem[] {
+function buildThinkItems(
+	model: Model<Api>,
+	currentThink?: string,
+): PickerItem[] {
 	const items: PickerItem[] = [
-		{ value: INHERIT, label: "inherit (no override)", check: currentThink === undefined },
+		{
+			value: INHERIT,
+			label: "inherit (no override)",
+			check: currentThink === undefined,
+		},
 	];
 	const levels = getSupportedThinkingLevels(model);
 	if (levels.includes("off"))
-		items.push({ value: "off", label: "off (disable reasoning)", check: currentThink === "off" });
+		items.push({
+			value: "off",
+			label: "off (disable reasoning)",
+			check: currentThink === "off",
+		});
 	const seen = new Set<string>();
 	for (const l of levels) {
 		if (l === "off" || seen.has(l)) continue;
@@ -389,7 +425,8 @@ async function configureAgent(
 			visibleModels = models;
 		}
 	} else {
-		favorNote = "收藏列表为空，显示全部模型（装 pi-model-favorites 后用 /m 收藏可筛选）";
+		favorNote =
+			"收藏列表为空，显示全部模型（装 pi-model-favorites 后用 /m 收藏可筛选）";
 	}
 
 	// 记住本次会话刚选的模型：Esc 从 think 退回 model 时，光标停在上次选的模型而非已保存值
@@ -425,7 +462,12 @@ async function configureAgent(
 
 		// 非 reasoning 模型无思考档位 → 直接保存（thinking = inherit）
 		if (!picked || !picked.reasoning) {
-			saveAgent(ctx, agent, mChoice === INHERIT ? undefined : mChoice, undefined);
+			saveAgent(
+				ctx,
+				agent,
+				mChoice === INHERIT ? undefined : mChoice,
+				undefined,
+			);
 			return "done";
 		}
 
@@ -457,7 +499,8 @@ type Completion = { value: string; label: string };
 
 export default function funAgentCfg(pi: ExtensionAPI) {
 	pi.registerCommand("fun-agent-cfg", {
-		description: "交互式配置 sub agent 的模型与思考强度（级联选择，按收藏筛选模型）",
+		description:
+			"交互式配置 sub agent 的模型与思考强度（级联选择，按收藏筛选模型）",
 		getArgumentCompletions: (args: string): Completion[] | null => {
 			const t = args.trim();
 			const items: Completion[] = listAgentEntries()
@@ -502,7 +545,8 @@ export default function funAgentCfg(pi: ExtensionAPI) {
 			while (true) {
 				const scopeItems: PickerItem[] = agents.map((a) => ({
 					value: a.name,
-					label: a.description ? `${displayLabel(a)} — ${a.description}` : displayLabel(a),
+					label: displayLabel(a),
+					sub: a.description ?? undefined,
 					check: false,
 				}));
 				const scope = await pickFromList(ctx, {
