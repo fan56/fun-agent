@@ -1,9 +1,10 @@
 {
-  "name": "fun-agent",
+  "name": "@aiwayds/pi-fun-agent",
   "version": "0.1.0",
   "description": "pi 自定义 sub agent 套件：workhorse(牛马狗) / oldfox(老法师) + workhorse-gate 安全门 + /fun-agent-cfg 配置命令",
   "type": "module",
   "license": "MIT",
+  "author": "aiwayds",
   "keywords": ["pi-package", "pi", "extension", "subagent"],
   "pi": {
     "extensions": ["./workhorse-gate.ts", "./index.ts"]
@@ -11,5 +12,16 @@
   "files": ["workhorse-gate.ts", "index.ts", "agents/", "README.md"],
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github:fan56/fun-agent"
+  },
+  "homepage": "https://github.com/fan56/fun-agent#readme",
+  "bugs": {
+    "url": "https://github.com/fan56/fun-agent/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
