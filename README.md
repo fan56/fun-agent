@@ -1,6 +1,6 @@
 # fun-agent
 
-pi 自定义 sub agent 套件：**workhorse**（牛马狗，干活主力）+ **oldfox**（老法师，顾问审核）。
+pi 自定义 sub agent 套件：**workhorse**（牛马狗，干活主力）+ **oldfox**（老法师，顾问审核）+ **rubber-duck**（小黄鸭，多模态视觉）。
 
 ## 内容
 
@@ -8,6 +8,7 @@ pi 自定义 sub agent 套件：**workhorse**（牛马狗，干活主力）+ **o
 | ------ | ------ |
 | `agents/workhorse.md` | workhorse 权威定义（部署到 `~/.pi/agent/agents/`） |
 | `agents/oldfox.md` | oldfox 权威定义（部署到 `~/.pi/agent/agents/`） |
+| `agents/rubber-duck.md` | rubber-duck 小黄鸭权威定义（多模态视觉 agent，部署到 `~/.pi/agent/agents/`） |
 | `workhorse-gate.ts` | workhorse 安全门扩展 |
 | `index.ts` | `/fun-agent-cfg` 命令扩展 |
 
@@ -17,6 +18,7 @@ pi 自定义 sub agent 套件：**workhorse**（牛马狗，干活主力）+ **o
 
     cp agents/workhorse.md ~/.pi/agent/agents/workhorse.md
     cp agents/oldfox.md ~/.pi/agent/agents/oldfox.md
+    cp agents/rubber-duck.md ~/.pi/agent/agents/rubber-duck.md
 
 ## 命令
 
@@ -48,4 +50,4 @@ pi 自定义 sub agent 套件：**workhorse**（牛马狗，干活主力）+ **o
 
 ## 配置
 
-默认模型与思考强度直接在 agent frontmatter 中定义（workhorse: deepseek-v4-flash/high；oldfox: GLM-5.2/max），可用 `/fun-agent-cfg` 随时调整。
+默认模型与思考强度直接在 agent frontmatter 中定义（workhorse: deepseek-v4-flash/high；oldfox: GLM-5.3/max；rubber-duck: Kimi K2.7 Code/max），可用 `/fun-agent-cfg` 随时调整。

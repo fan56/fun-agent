@@ -1,7 +1,7 @@
 {
   "name": "@aiwayds/pi-fun-agent",
-  "version": "0.1.1",
-  "description": "pi 自定义 sub agent 套件：workhorse(牛马狗) / oldfox(老法师) + workhorse-gate 安全门 + /fun-agent-cfg 配置命令",
+  "version": "0.1.2",
+  "description": "pi 自定义 sub agent 套件：workhorse(牛马狗) / oldfox(老法师) / rubber-duck(小黄鸭) + workhorse-gate 安全门 + /fun-agent-cfg 配置命令",
   "type": "module",
   "license": "MIT",
   "author": "aiwayds",
