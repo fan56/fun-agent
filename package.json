@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "github:fan56/fun-agent"
+    "url": "git+https://github.com/fan56/fun-agent.git"
   },
   "homepage": "https://github.com/fan56/fun-agent#readme",
   "bugs": {
